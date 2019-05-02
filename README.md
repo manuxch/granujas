@@ -1,4 +1,4 @@
-# autopropMag
+# autoPropMag
 
 Simulación de granos autopropulsados con interacciones magnéticas.
 
