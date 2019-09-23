@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
             fileF.open(foutName.c_str());
             saveFrame(&fileF, &world);
             fileF.close();
-            cout << "Frame " << paso << " guardado en " << timeS << endl;
+            //cout << "Frame " << paso << " guardado en " << timeS << endl;
         }
         if (timeS > globalSetup->tMax) {
             cout << "# Máximo tiempo de simulación alcanzado." << endl;
