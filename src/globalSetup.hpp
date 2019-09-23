@@ -89,6 +89,7 @@ public:
     double theta; /*!< Inclinación de la caja (ángulo del plano con la horizontal) */
     double noise; /*!< Intensidad del impulso de ruido (Ns) */
     int noiseFreq; /*!< Frecuencia de aplicación de ruido */
+    double tNoiseOff; /*!< Tiempo de apagado del ruido */
 	
     // Parámetros de estadísticas y registros
     int saveFrameFreq; /*!< Frecuencia de guardado de frames */

@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
     while (isActive(&world)) {
 
         // Si es necesario, aplicación de impulsos
-        if (globalSetup->noiseFreq && !(paso % globalSetup->noiseFreq)) {
+        if (globalSetup->noiseFreq &&  (timeS < globalSetup->tNoiseOff) && !(paso % globalSetup->noiseFreq)) {
             noiseInt = globalSetup->noise;
             //noiseInt = rng.get01() * globalSetup->noise;
             for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {

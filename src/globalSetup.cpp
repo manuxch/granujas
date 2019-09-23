@@ -183,6 +183,13 @@ void GlobalSetup::load(string inputFile){
                 exit(1);
             }
         }
+		if (ident == "tNoiseOff:") {
+			fin >> tNoiseOff;
+			if (tMax < 0.0) {
+				cout << "ERROR: el tiempo de apagado del ruido debe ser > 0." << endl;
+				exit(1);
+			}
+		}
         if (ident == "Bullets:") {
             string bull;
             fin >> bull;
@@ -256,6 +263,7 @@ void GlobalSetup::load(string inputFile){
     cout << "# \t Ángulo de inclinación del plano: " << theta << " grados." << endl;
     cout << "# \t Intensidad de la vibración: " << noise << " Ns." << endl; 
     cout << "# \t Frecuencia de la vibración: " << noiseFreq << " pasos." << endl; 
+    cout << "# \t Tiempo de apagado de la vibración: " << tNoiseOff << " s." << endl; 
     cout << "# \t Granos considerados bullet? " << (isBullet ? "Si." : "No.") << endl;
     cout << "# \t Semilla del generador de números aleatorios: " << randomSeed << endl;
 	cout << "# Parámetros de estadísticas y registros:" << endl;
