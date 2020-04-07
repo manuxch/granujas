@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 #include "globalSetup.hpp"
 
 /*! Convierte un número en una string de ancho fijo

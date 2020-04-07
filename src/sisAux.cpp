@@ -28,7 +28,7 @@ bool isActive(b2World *w) {
 
 void savePart(std::ofstream *ff, b2World *w) {
     BodyData* infGr;
-    b2Vec2 p; float32 angle;
+    b2Vec2 p; float angle;
     for (b2Body *bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
         infGr = (BodyData*) (bd->GetUserData());
         if (infGr->isGrain) {
@@ -41,7 +41,7 @@ void savePart(std::ofstream *ff, b2World *w) {
 }
 
 void saveFrame(std::ofstream *ff,  b2World *w) {
-    b2Vec2 v2; float32 xtmp, ytmp;
+    b2Vec2 v2; float xtmp, ytmp;
     for ( b2Body* bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
         BodyData* infGr = (BodyData*) (bd->GetUserData());
         *(ff) << infGr->gID << " ";
@@ -64,7 +64,7 @@ void saveFrame(std::ofstream *ff,  b2World *w) {
                 b2Vec2 pos = bd->GetPosition();
                  b2Fixture* f = bd->GetFixtureList();
                  b2Shape* bs = (b2Shape*) f->GetShape();
-                float32 radio = bs->m_radius;
+                float radio = bs->m_radius;
                 *(ff) << pos.x << " " << pos.y << " " << radio << " ";
                 //v2 = bd->GetLinearVelocity();
                 //angle = bd->GetAngularVelocity();
@@ -113,7 +113,7 @@ int countDesc(b2World *w, int *st, int maxDiam) {
 void setMagneticForces(b2World *w) {
     BodyData *i1, *i2;
     b2Vec2 r1, r2, r12, sumF;
-    float32 fB, r;
+    float fB, r;
     for (b2Body *bd1 = w->GetBodyList(); bd1; bd1 = bd1->GetNext()) {
         i1 = (BodyData*) (bd1->GetUserData());
         if (!i1->isMag) continue;

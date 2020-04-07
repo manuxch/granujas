@@ -22,7 +22,7 @@ using std::vector;
 using std::sin; using std::cos;
 #include <iomanip>
 using std::fixed; using std::setw;
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 #include <time.h>
 
 /** \struct Contenedor

@@ -15,7 +15,7 @@
 
 #include <iostream>
 using namespace std;
-#include <Box2D/Box2D.h>
+#include <box2d/box2d.h>
 #include "globalSetup.hpp"
 #include <string>
 #include <cmath>
@@ -59,9 +59,10 @@ int main(int argc, char *argv[])
     caja->SetUserData(cajaD);
     
     int32 nverts = globalSetup->caja.nVerts;
-    float32 xtmp, ytmp;
+    float xtmp, ytmp;
     b2Vec2 *verts = new b2Vec2[nverts];
-    float32 angle = 0.0, delta_angle = 360.0/nverts;
+    float angle = 0.0; 
+    float delta_angle = 360.0/nverts;
     for (int i = 0; i < nverts; ++i) {
         xtmp = globalSetup->caja.R * cos(angle * b2_pi / 180.0f);
         ytmp = globalSetup->caja.R * sin(angle * b2_pi / 180.0f);
@@ -78,8 +79,8 @@ int main(int argc, char *argv[])
     cout << "#\t- Silo creado." << endl;
     
     // Generación de granos.
-    float32 xInf, xSup, yInf, ySup, x, y;
-    float32 mg = 0.0;
+    float xInf, xSup, yInf, ySup, x, y;
+    float mg = 0.0;
     int noTotGranos = 0;
     xInf = 0.707107f * globalSetup->caja.R; // srtq(2) * R
     xSup = -0.707107f * globalSetup->caja.R;
@@ -147,8 +148,8 @@ int main(int argc, char *argv[])
     cout << "#\t- Masa total de granos = " << mg << " kg."<< endl;
 
     // Preparamos los parámetros de la simulación. 
-    float32 timeStep = globalSetup->tStep;
-    float32 timeS = 0.0;
+    float timeStep = globalSetup->tStep;
+    float timeS = 0.0;
     int32 pIterations = globalSetup->pIter;
     int32 vIterations = globalSetup->vIter;
 
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
     BodyData *infGr;
 
     b2Vec2 vtmp;
-    float32 vtmpM, fricBase;
+    float vtmpM, fricBase;
 
     // Primeros pasos para satisfacer restricciones
     for (int i = 0; i < 5; ++i) world.Step(timeStep, pIterations, vIterations);

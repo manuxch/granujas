@@ -8,9 +8,9 @@
 
 CXX = g++
 BOX2D = /home/manuel/Tools/Box2D
-LIBPATH = -L$(BOX2D)/Build/bin/x86_64/Debug
-INCLUDES = -I$(BOX2D)
-LIBS = -lBox2D -lm
+LIBPATH = -L$(BOX2D)/build/src
+INCLUDES = -I$(BOX2D)/include
+LIBS = -lbox2d -lm
 CXXFLAGS = -O3 $(INCLUDES)
 LDFLAGS = -O3 -Wall $(LIBPATH) -static $(LIBS)
 
