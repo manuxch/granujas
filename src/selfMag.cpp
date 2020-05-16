@@ -6,9 +6,9 @@
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
  * 
- * \version 1.0 Versión inicial 
+ * \version 1.1 Versión inicial 
  *
- * \date 2019.02.15
+ * \date 2020.05.16
  *
  * */
 
@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     cajaD->nLados = globalSetup->caja.nVerts;
     cajaD->gID = -100;
     cajaD->m = 0.0f;
+    cajaD->r = 0;
     caja->SetUserData(cajaD);
     
     int32 nverts = globalSetup->caja.nVerts;
@@ -92,15 +93,19 @@ int main(int argc, char *argv[])
     
     int contGid = 1;
     int *sumaTipo = new int[globalSetup->noTipoGranos] {};
-    for (int i = 0; i < globalSetup->noTipoGranos; i++) { // Loop sobre tipos de granos.
+    for (int i = 0; i < globalSetup->noTipoGranos; i++) { /* Loop sobre tipos 
+                                                             de granos. */
         gInfo[i] = new BodyData[globalSetup->granos[i]->noGranos];
-        for (int j = 0; j < globalSetup->granos[i]->noGranos; j++) { // Loop sobre el número de granos de cada tipo.
+        for (int j = 0; j < globalSetup->granos[i]->noGranos; j++) { /* Loop 
+                                    sobre el número de granos de cada tipo.*/
             x = rng.getAB(xInf, xSup);
             y = rng.getAB(yInf, ySup);
             gInfo[i][j].tipo = i;
             gInfo[i][j].isGrain = true;
-            gInfo[i][j].isMag = (abs(globalSetup->granos[i]->m) > 1.0E-8 ? true : false);
+            gInfo[i][j].isMag = 
+                (abs(globalSetup->granos[i]->m) > 1.0E-8 ? true : false);
             gInfo[i][j].m = globalSetup->granos[i]->m;
+            gInfo[i][j].r = globalSetup->granos[i]->r;
             gInfo[i][j].nLados = globalSetup->granos[i]->nLados;
             gInfo[i][j].f.Set(0.0f, 0.0f);
             gInfo[i][j].gID = contGid++;
@@ -123,14 +128,17 @@ int main(int argc, char *argv[])
                 fixDef.restitution = globalSetup->granos[i]->rest;
                 grain->CreateFixture(&fixDef);
                 mg += grain->GetMass();
-                if (j == 0) cout << "#\t- Grano de tipo " << i << " creado con masa " << grain->GetMass() << " kg." << endl;
+                if (j == 0) cout << "#\t- Grano de tipo " << i 
+                    << " creado con masa " << grain->GetMass() 
+                        << " kg." << endl;
             }
             else {
                 b2PolygonShape poly;
                 int32 vertexCount = globalSetup->granos[i]->nLados;
                 b2Vec2 vertices[8];
                 for (int k = 0; k < globalSetup->granos[i]->nLados; k++) 
-                    vertices[k].Set(globalSetup->granos[i]->vertices[k][0],globalSetup->granos[i]->vertices[k][1]);
+                    vertices[k].Set(globalSetup->granos[i]->vertices[k][0],
+                            globalSetup->granos[i]->vertices[k][1]);
                 poly.Set(vertices,vertexCount);
                 b2FixtureDef fixDef;
                 fixDef.shape = &poly;
@@ -139,7 +147,9 @@ int main(int argc, char *argv[])
                 fixDef.restitution = globalSetup->granos[i]->rest;
                 grain->CreateFixture(&fixDef);
                 mg += grain->GetMass();
-                if (j == 0) cout << "#\t- Grano de tipo " << i << " creado con masa " << grain->GetMass() << " kg." << endl;
+                if (j == 0) cout << "#\t- Grano de tipo " << i 
+                    << " creado con masa " << grain->GetMass() 
+                        << " kg." << endl;
             }
             noTotGranos++;
         } // Fin loop sobre el número de granos de cada tipo.
@@ -187,20 +197,23 @@ int main(int argc, char *argv[])
     while (isActive(&world)) {
 
         // Si es necesario, aplicación de impulsos
-        if (globalSetup->noiseFreq &&  (timeS < globalSetup->tNoiseOff) && !(paso % globalSetup->noiseFreq)) {
+        if (globalSetup->noiseFreq &&  (timeS < globalSetup->tNoiseOff) 
+                && !(paso % globalSetup->noiseFreq)) {
             noiseInt = globalSetup->noise;
             //noiseInt = rng.get01() * globalSetup->noise;
             for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
                 infGr = (BodyData*) (bd->GetUserData());
                 if (infGr->isGrain) {
-                    //bd->ApplyForce(avec, bd->GetWorldCenter(), true);
                     noiseAng = bd->GetAngle();
-                    avec.Set(noiseInt * cos(noiseAng), noiseInt * sin(noiseAng));
+                    avec.Set(noiseInt * cos(noiseAng), 
+                            noiseInt * sin(noiseAng));
+                    if (infGr->r) {
+                        avec*= -1.0;
+                    }
                     bd->ApplyLinearImpulseToCenter(avec, true);
                 }
             }
         }
-
 
         // Cálculo y aplicación de fuerzas magnéticas y fricción con la base
         setMagneticForces(&world);
@@ -215,6 +228,8 @@ int main(int argc, char *argv[])
                 vtmp = -vtmp;
                 vtmp *= fricBase;
                 bd->ApplyForceToCenter(vtmp, true);
+                bd->SetAngularVelocity(globalSetup->atRot 
+                        * bd->GetAngularVelocity());
             }
             else {
                 bd->SetLinearVelocity(b2Vec2(0.0f, 0.0f));
@@ -229,7 +244,8 @@ int main(int argc, char *argv[])
 
         // Si es necesario, guardo el frame para graficar
         if (saveFrm && !(paso % globalSetup->saveFrameFreq)) {
-            string foutName = globalSetup->preFrameFile+ "_" + n2s(paso) + ".xy";
+            string foutName = globalSetup->preFrameFile+ "_" 
+                + n2s(paso) + ".xy";
             fileF.open(foutName.c_str());
             saveFrame(&fileF, &world);
             fileF.close();
