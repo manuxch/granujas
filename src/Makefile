@@ -7,7 +7,7 @@
 
 
 CXX = g++
-BOX2D = /home/manuel/Tools/Box2D
+BOX2D = /home/manuel/Tools/box2d
 LIBPATH = -L$(BOX2D)/build/src
 INCLUDES = -I$(BOX2D)/include
 LIBS = -lbox2d -lm
