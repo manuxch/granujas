@@ -2,14 +2,16 @@
  * \brief Archivo de cabecera para funciones auxiliares
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
- * \version 1.0
- * \date 20018.12.14
+ * \version 1.1
+ * \date 2020.06.11 
  */
 
 #include <iostream>
 #include <iomanip>
+using std::setw; using std::setprecision; using std::fixed;
 #include <sstream>
 #include <string>
+#include <vector>
 #include <box2d/box2d.h>
 #include "globalSetup.hpp"
 
@@ -54,3 +56,10 @@ int countDesc(b2World *w, int *st, int maxD);
  * \return void
  */
 void setMagneticForces(b2World *w);
+
+/*! Guarda las coordenadas, velocidades y contactos de todas los granos
+ * \param std::ofstream* ff
+ * \param b2Word* w
+ * \return void
+ */
+void saveXVCFile(std::ofstream *ff, b2World *w);

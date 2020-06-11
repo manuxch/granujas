@@ -5,12 +5,9 @@
  * de granos autopropulsados con dipolos magnéticos.
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
- * 
- * \version 1.1 Versión inicial 
- *
- * \date 2020.05.16
- *
- * */
+ * \version 1.2 
+ * \date 2020.06.11
+ */
 
 
 #include <iostream>
@@ -31,8 +28,8 @@ using std::exit;
 
 int main(int argc, char *argv[])
 {
-    cout << "# SiloMag" << endl;
-    cout << "# v0.1 [2018.12.14]" << endl;
+    cout << "# selfMag" << endl;
+    cout << "# v1.2 [2020.06.20]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile); 
     RandomGenerator rng(globalSetup->randomSeed);
@@ -167,16 +164,8 @@ int main(int argc, char *argv[])
     b2Vec2 pos, avec; 
     int paso = 0;
     bool saveFrm = (globalSetup->saveFrameFreq > 0 ? true : false);
-    bool saveFlux = (globalSetup->fluxFreq > 0 ? true : false);
-    std::ofstream fileFlux;
-    if (saveFlux) {
-        fileFlux.open((globalSetup->fluxFile).c_str());
-        fileFlux << "# time  Grains" << " ";
-        for (int i = 0; i < globalSetup->noTipoGranos; ++i) {
-            fileFlux << " - Tipo " << i;
-        }
-        fileFlux << endl;
-    }
+    bool saveXVC = (globalSetup->xvcFreq > 0 ? true : false);
+    std::ofstream fileXVC;
     double noiseInt, noiseAng;
     std::ofstream fileF;
     BodyData *infGr;
@@ -188,11 +177,13 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 5; ++i) world.Step(timeStep, pIterations, vIterations);
     
     // Guardo configuración inicial
-    string foutName = globalSetup->preFrameFile+ "_" + n2s(paso) + ".xy";
-    fileF.open(foutName.c_str());
-    saveFrame(&fileF, &world);
-    fileF.close();
-    cout << "Frame " << paso << " guardado en " << timeS << endl;
+    if (saveFrm) {
+        string foutName = globalSetup->preFrameFile+ "_" + n2s(paso) + ".xy";
+        fileF.open(foutName.c_str());
+        saveFrame(&fileF, &world);
+        fileF.close();
+        cout << "Frame " << paso << " guardado en " << timeS << endl;
+    }
 
     while (isActive(&world)) {
 
@@ -251,6 +242,15 @@ int main(int argc, char *argv[])
             fileF.close();
             //cout << "Frame " << paso << " guardado en " << timeS << endl;
         }
+        // Si es necesario, guardo las coordenadas, velocidades y contactos
+        if (saveXVC && !(paso % globalSetup->xvcFreq)) {
+            string foutName = globalSetup->xvcFile+ "_" 
+                + n2s(paso) + ".xvc";
+            fileF.open(foutName.c_str());
+            saveXVCFile(&fileF, &world);
+            fileF.close();
+        }
+
         if (timeS > globalSetup->tMax) {
             cout << "# Máximo tiempo de simulación alcanzado." << endl;
             break;
@@ -260,7 +260,6 @@ int main(int argc, char *argv[])
 
     
     // Clean up
-    if (saveFlux) fileFlux.close();
     delete globalSetup;
     delete [] gInfo;
     delete [] verts;

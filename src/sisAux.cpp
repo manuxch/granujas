@@ -3,16 +3,16 @@
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
  *
- * \version 1.0 Versión inicial
+ * \version 1.1 
  *
- * \date 2019.02.16
+ * \date 2020.06.11
  */
 
 #include "sisAux.hpp"
 
 std::string n2s(int num) {
     std::ostringstream oss;
-    oss << std::setfill('0') << std::setw(6) << num;
+    oss << std::setfill('0') << setw(6) << num;
     return oss.str();
 }
 
@@ -34,7 +34,8 @@ void savePart(std::ofstream *ff, b2World *w) {
         if (infGr->isGrain) {
             p = bd->GetPosition();
             angle = bd->GetAngle();
-            *(ff) << infGr->gID << " " << p.x << " " << p.y << " " << angle << " " << endl;
+            *(ff) << infGr->gID << " " << p.x << " " << p.y << " " << angle 
+                  << " " << endl;
         }
     }
     *(ff) << std::flush;
@@ -66,9 +67,6 @@ void saveFrame(std::ofstream *ff,  b2World *w) {
                  b2Shape* bs = (b2Shape*) f->GetShape();
                 float radio = bs->m_radius;
                 *(ff) << pos.x << " " << pos.y << " " << radio << " ";
-                //v2 = bd->GetLinearVelocity();
-                //angle = bd->GetAngularVelocity();
-                //*(ff) << v2.x << " " << v2.y << " " << angle << " ";
             }
             if (infGr->isMag) {
                 *(ff) << 1 << " ";
@@ -132,6 +130,49 @@ void setMagneticForces(b2World *w) {
             sumF -= r12;
         }
         i1->f = sumF;
-        //cout << "Grano " << i1->gID << " Fuerza " << i1->f.x << " , " << i1->f.y << endl;
     }
 }
+
+void saveXVCFile(std::ofstream *ff, b2World *w) {
+    b2Vec2 p, v; 
+    float ang, angv;
+    (*ff) << setw(5) << "#id" << " "
+        << setw(8) << "xc" << " "
+        << setw(8) << "yc" << " "
+        << setw(8) << "ang" << " "
+        << setw(8) << "xv" << " "
+        << setw(8) << "yv" << " "
+        << setw(8) << "angV" << " "
+        << setw(2) << "t" << " "
+        << setw(2) << "nc" << " c1 c2 ..." << std::endl;
+
+    for (b2Body* bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
+        BodyData* infGr = (BodyData*) (bd->GetUserData());
+        if (!(infGr->isGrain)) continue; 
+        p = bd->GetPosition();
+        ang = bd->GetAngle();
+        v = bd->GetLinearVelocity();
+        angv = bd->GetAngularVelocity();
+        vector<int> contacts;
+        for (b2ContactEdge *e = bd->GetContactList(); e; e = e->next) {
+            if(!(e->contact->IsTouching())) continue;
+            b2Body *bb = e->other;
+            BodyData *infGrB = (BodyData*) (bb->GetUserData());
+            contacts.push_back(infGrB->gID);
+        }
+        (*ff) << setw(5) << infGr->gID  << " "
+            << setw(8) << fixed << setprecision(3) << p.x << " "
+            << setw(8) << fixed << setprecision(3) << p.y << " " 
+            << setw(8) << fixed << setprecision(3) << ang << " "
+            << setw(8) << fixed << setprecision(3) << v.x << " "
+            << setw(8) << fixed << setprecision(3) << v.y << " "
+            << setw(8) << fixed << setprecision(3) << angv << " "
+            << setw(2) << infGr->tipo + 1 << " ";
+        (*ff) << contacts.size() << " ";
+        for (size_t i = 0; i < contacts.size(); ++i) {
+            (*ff) << contacts[i] << " ";
+        }
+        (*ff) << std::endl;
+    }
+}
+

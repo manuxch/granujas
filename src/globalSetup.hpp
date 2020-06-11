@@ -8,6 +8,10 @@
 #ifndef _GLOBALSETUP_H
 #define _GLOBALSETUP_H
 
+#define INFO(msg) \
+    fprintf(stderr, "info: %s:%d: ", __FILE__, __LINE__); \
+    fprintf(stderr, "%s\n", msg);
+
 #include <cstdlib>
 using std::exit;
 #include <iostream>
@@ -106,8 +110,10 @@ public:
     int saveFrameFreq; /*!< Frecuencia de guardado de frames */
     string preFrameFile; /*!< Prefijo del nombre del archivo de salida de 
                            frame/trayectoria */
-    int fluxFreq; /*!< Frecuencia de observación del flujo */
-    string fluxFile; /*!< Prefijo del nombre del archivo de salida de flujo */
+    int xvcFreq; /*!< Frecuencia de guardado de coordenadas, velocidades y
+                        contactos */
+    string xvcFile; /*!< Prefijo del nombre del archivo de salida de 
+                      coordenadas, velocidades y contactos */
 
     
     // Constructor & destructor
@@ -115,10 +121,14 @@ public:
     ~GlobalSetup();
     
     // Info
+    /*! \fn GlobalSetup::printGlobalSetup()
+        Función que imprime las variables contenidas en GlobalSetup
+    */
     void printGlobalSetup();
+
     string inputFile; /*!< Nombre del archivo que contiene los parámetros de 
                         ejecución */
-    //ModeOut modeOut; [>!< Define el modo de salida de la información <]
+    
     unsigned int randomSeed; /*!< Semilla del generador de números aleatorios */
 
 private:

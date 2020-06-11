@@ -210,9 +210,6 @@ void GlobalSetup::load(string inputFile){
         if (ident == "preFrameFile:") {
             fin >> preFrameFile;
         }
-        if (ident == "fluxFile:") {
-            fin >> fluxFile;
-        }
         if (ident == "saveFrameFreq:") {
             fin >> saveFrameFreq;
             if (saveFrameFreq < 0) {
@@ -220,11 +217,14 @@ void GlobalSetup::load(string inputFile){
             exit(1);
             }
         }
-        if (ident == "fluxFreq:") {
-            fin >> fluxFreq;
-            if (fluxFreq < 0) {
-                cout << "ERROR: la frecuencia de guardado del flujo debe ser "
-                    << ">= 0." << endl;
+        if (ident == "xvc_File:") {
+            fin >> xvcFile;
+        }
+        if (ident == "xvc_Freq:") {
+            fin >> xvcFreq;
+            if (xvcFreq < 0) {
+                cout << "ERROR: la frecuencia de guardado de coordenadas, "
+                     << "velocidades y contactos debe ser >= 0." << endl;
                 exit(1);
             }
         }
@@ -239,9 +239,6 @@ void GlobalSetup::load(string inputFile){
     } //fin bucle de lectura de inputFile
 } // Fin función load()
 
-/*! \fn GlobalSetup::printGlobalSetup()
-    Función que imprime las variables contenidas en GlobalSetup
-    */
  void GlobalSetup::printGlobalSetup() {
     cout << "# Lectura de los parámetros de entrada ..." << endl;
     cout << "#  Archivo de parámetros: " << inputFile << endl;
@@ -301,7 +298,9 @@ void GlobalSetup::load(string inputFile){
     cout << "# Parámetros de estadísticas y registros:" << endl;
     cout << "# \t Prefijo de archivos de frames: " << preFrameFile << endl;
     cout << "# \t Frecuencia de guardado de frames: " << saveFrameFreq << endl;
-    cout << "# \t Prefijo de archivo de flujo: " << fluxFile << endl;
-    cout << "# /t Frecuencia de guardado de flujo: " << fluxFreq << endl;
+    cout << "# \t Frecuencia de guardado de coordenadas, velocidades y "
+         << "contactos: " << xvcFreq << endl;
+    cout << "# \t Prefijo de archivo de coordenadas, velocidades y contactos: " 
+         << xvcFile << endl;
     cout << "# ... lectura de parámetros de entrada finalizada." << endl;
 }
