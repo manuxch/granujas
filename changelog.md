@@ -1,5 +1,11 @@
 # Changelog
 
+## 2020.06.23
+Versión 1.3
+
+- Optimización del cálculo de interacciones magnéticas
+- Corrección del módulo de la fuerza magnética
+
 ## 2020.06.11
 Versión 1.2
 

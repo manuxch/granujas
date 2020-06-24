@@ -29,7 +29,7 @@ using std::exit;
 int main(int argc, char *argv[])
 {
     cout << "# selfMag" << endl;
-    cout << "# v1.2 [2020.06.20]" << endl;
+    cout << "# v1.3 [2020.06.23]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile); 
     RandomGenerator rng(globalSetup->randomSeed);

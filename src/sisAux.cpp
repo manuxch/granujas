@@ -114,22 +114,25 @@ void setMagneticForces(b2World *w) {
     float fB, r;
     for (b2Body *bd1 = w->GetBodyList(); bd1; bd1 = bd1->GetNext()) {
         i1 = (BodyData*) (bd1->GetUserData());
+        i1->f = b2Vec2(0.0, 0.0);
+    }
+    for (b2Body *bd1 = w->GetBodyList(); bd1; bd1 = bd1->GetNext()) {
+        i1 = (BodyData*) (bd1->GetUserData());
         if (!i1->isMag) continue;
         r1 = bd1->GetPosition();
-        sumF.Set(0.0f, 0.0f);
-        for (b2Body *bd2 = w->GetBodyList(); bd2; bd2 = bd2->GetNext()) {
+        for (b2Body *bd2 = bd1->GetNext(); bd2; bd2 = bd2->GetNext()) {
             i2 = (BodyData*) (bd2->GetUserData());
             if (!i2->isMag) continue;
             if (i1->gID == i2->gID) continue;
             r2 = bd2->GetPosition();
             r12.Set(r2.x - r1.x, r2.y - r1.y);
             r = r12.Length();
-            fB = 3.0E-7 * i1->m * i2->m / (r * r * r * r * r);
+            fB = 3.0E-7 * i1->m * i2->m / (r * r * r * r);
             r12.Normalize();
             r12 *= fB;
-            sumF -= r12;
+            i1->f -= r12;
+            i2->f += r12;
         }
-        i1->f = sumF;
     }
 }
 
