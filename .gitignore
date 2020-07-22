@@ -1,2 +1,4 @@
 # Ignore test directory
 /test/*
+.directory
+./src/.directory
