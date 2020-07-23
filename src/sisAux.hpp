@@ -30,7 +30,7 @@ bool isActive(b2World *w);
 
 /*! Escribe en el archivo de salida las coordenadas de las partículas
  * \param std::ofstream* ff
- * \param b2Word* w
+ * \param b2World* w
  * \return void
  */
 void savePart(std::ofstream *ff, b2World *w);
@@ -59,7 +59,14 @@ void setMagneticForces(b2World *w);
 
 /*! Guarda las coordenadas, velocidades y contactos de todas los granos
  * \param std::ofstream* ff
- * \param b2Word* w
+ * \param b2World* w
  * \return void
  */
 void saveXVCFile(std::ofstream *ff, b2World *w);
+
+/*! \fn energyCalculation
+ * \brief Calcula la energía cinética y potencial magnética del sistema
+ * \param b2World* w
+ * \return Energias
+ */
+Energias energyCalculation(b2World *w);

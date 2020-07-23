@@ -179,3 +179,33 @@ void saveXVCFile(std::ofstream *ff, b2World *w) {
     }
 }
 
+Energias energyCalculation(b2World *w){
+    Energias eKU {0.0, 0.0};
+    b2Vec2 pi, vi, pj, pij;
+    float wi, mi, Ii, vim, pijm;
+    float mui, muj;
+    for (b2Body* bi = w->GetBodyList(); bi; bi = bi->GetNext()) {
+        BodyData* igi = (BodyData*) (bi->GetUserData());
+        if (!igi->isGrain) continue;
+        pi = bi->GetPosition();
+        vi = bi->GetLinearVelocity();
+        vim = vi.Length();
+        wi = bi->GetAngularVelocity();
+        mi = bi->GetMass();
+        mui = igi->m;
+        Ii = bi->GetInertia();
+        eKU.eKin += 0.5 * (mi * vim * vim + Ii * wi * wi);
+        for (b2Body* bj = bi->GetNext(); bj; bj = bj->GetNext()) {
+            BodyData* igj = (BodyData*) (bj->GetUserData());
+            if (!igj->isGrain) continue;
+            pj = bj->GetPosition();
+            muj = igj->m;
+            pij = pj - pi;
+            pijm = pij.Length();
+            // Ver 
+            // https://en.wikipedia.org/wiki/Magnetic_dipole-dipole_interaction
+            eKU.ePot += 1.0E-7 * mui * muj / (pijm * pijm * pijm);
+        }
+    }
+    return eKU;
+}

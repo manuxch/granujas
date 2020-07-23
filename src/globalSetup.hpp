@@ -42,6 +42,8 @@ struct Contenedor {
     double nVerts; /*!< Cantidad de vértices del contenedor */
     double fric; /*!< Coeficiente de fricción del contenedor */
     double rest; /*!< Coeficiente de restitución del contenedor */
+    double fgb_stat; /*!< Coeficiente de fricción estático grano-base */
+    double fgb_dyn; /*!< Coeficiente de fricción estático grano-base */
 };
 /** \struct tipoGrano
  * \brief Estructura que contiene información sobre un determinado tipo de 
@@ -78,6 +80,13 @@ struct BodyData {
     b2Vec2 f; /*!< Fuerza acumulada sobre el grano (no gravitatoria) */
 };
 
+/** \struct Energias
+ * \brief Contiene la energía cinética y potencial magnética del sistema
+ */
+struct Energias {
+    double eKin; /*!< Energía cinética */
+    double ePot; /*!< Energía potencial magnética */
+};
 
 /** \class GlobalSetup
  * Clase que contiene toda la información necesaria para realizar una simulación
@@ -99,8 +108,6 @@ public:
     int vIter; /*!< Iteraciones para la satisfacción de restricciones de 
                  velocidad */
     double g; /*!< Aceleración de la gravedad */
-    double theta; /*!< Inclinación de la caja (ángulo del plano con la 
-                    horizontal) */
     double noise; /*!< Intensidad del impulso de ruido (Ns) */
     int noiseFreq; /*!< Frecuencia de aplicación de ruido */
     double tNoiseOff; /*!< Tiempo de apagado del ruido */
@@ -114,6 +121,8 @@ public:
                         contactos */
     string xvcFile; /*!< Prefijo del nombre del archivo de salida de 
                       coordenadas, velocidades y contactos */
+    int enerFreq; /*!< Frecuencia de guardado de energías */
+    string enerFile; /*!< Archivo de guardado de energías */
 
     
     // Constructor & destructor

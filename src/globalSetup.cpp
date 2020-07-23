@@ -67,6 +67,24 @@ void GlobalSetup::load(string inputFile){
                 exit(1);
             }
         }
+        if (ident == "fricGB_static:") {
+            fin >> caja.fgb_stat;
+            if (caja.fgb_stat <= 0) {
+                cout << "ERROR: El coeficiente de fricción estático "
+                    << "grano-base debe ser > 0." 
+                    << endl;
+                exit(1);
+            }
+        }
+        if (ident == "fricGB_dynamic:") {
+            fin >> caja.fgb_dyn;
+            if (caja.fgb_stat <= 0) {
+                cout << "ERROR: El coeficiente de fricción dinámico "
+                    << "grano-base debe ser > 0." 
+                    << endl;
+                exit(1);
+            }
+        }
         // Fin parámetros del contenedor
         //
         // Lectura de parámetros de los granos
@@ -108,7 +126,7 @@ void GlobalSetup::load(string inputFile){
                         << endl;
                     exit(1);
                 }
-                if (granos[i]->fric< 0.0) {
+                if (granos[i]->fric < 0.0) {
                     cout << "ERROR: El coeficiente de rozamiento debe ser 0 " 
                         << " <= rozam." << endl;
                     exit(1);
@@ -170,13 +188,6 @@ void GlobalSetup::load(string inputFile){
         if (ident == "g:") {
             fin >> g;
         }
-        if (ident == "theta:") {
-            fin >> theta;
-            if (theta < 0.0 || theta > 90.0) {
-                cout << "ERROR: Theta debe ser 0 <= theta <= 90." << endl;
-                exit(1);
-            }
-        }
         if (ident == "noise:") {
             fin >> noise;
             if (noise < 0.0) {
@@ -236,6 +247,17 @@ void GlobalSetup::load(string inputFile){
                 exit(1);
             }
         }
+        if (ident == "enerFreq:") {
+            fin >> enerFreq;
+            if (enerFreq < 0) {
+                cout << "ERROR: la frecuencia de guardado de energías debe ser"
+                    << " >= 0." << endl;
+                exit(1);
+            }
+        }
+        if (ident == "enerFile:") {
+            fin >> enerFile;
+        }
     } //fin bucle de lectura de inputFile
 } // Fin función load()
 
@@ -244,12 +266,14 @@ void GlobalSetup::load(string inputFile){
     cout << "#  Archivo de parámetros: " << inputFile << endl;
     cout << "# Parámetros de los objetos" << endl;
     cout << "# \t Radio de la caja: " << caja.R << " [m]" << endl;
-    cout << "# \t Número de vértices de la caja: " << caja.nVerts << " [m]" 
-        << endl;
-    cout << "# \t Coeficiente de fricción de la caja: " << caja.fric << " [m]" 
-        << endl;
+    cout << "# \t Número de vértices de la caja: " << caja.nVerts << endl;
+    cout << "# \t Coeficiente de fricción de la caja: " << caja.fric << endl;
     cout << "# \t Coeficiente de restitución de la caja: " << caja.rest 
-        << " [m]" << endl;
+        << endl;
+    cout << "# \t Coeficiente de fricción estático grano-base: " 
+        << caja.fgb_stat << endl;
+    cout << "# \t Coeficiente de fricción dinámico grano-base: " 
+        << caja.fgb_stat << endl;
     cout << "#  Parámetros de los granos:" << endl;
     cout << "# \t Número de tipos de granos: " << noTipoGranos << endl;
     for (int i = 0; i < noTipoGranos; i++) {
@@ -283,8 +307,6 @@ void GlobalSetup::load(string inputFile){
     cout << "# \t Iteraciones para restricciones de velocidad: " << vIter 
         << endl;
     cout << "# \t Aceleración de la gravedad: " << g << " m/s²." << endl;
-    cout << "# \t Ángulo de inclinación del plano: " << theta << " grados." 
-        << endl;
     cout << "# \t Intensidad de la vibración: " << noise << " Ns." << endl; 
     cout << "# \t Frecuencia de la vibración: " << noiseFreq << " pasos." 
         << endl; 
@@ -297,10 +319,14 @@ void GlobalSetup::load(string inputFile){
         << endl;
     cout << "# Parámetros de estadísticas y registros:" << endl;
     cout << "# \t Prefijo de archivos de frames: " << preFrameFile << endl;
-    cout << "# \t Frecuencia de guardado de frames: " << saveFrameFreq << endl;
+    cout << "# \t Frecuencia de guardado de frames: " << saveFrameFreq 
+        << " pasos" << endl;
     cout << "# \t Frecuencia de guardado de coordenadas, velocidades y "
-         << "contactos: " << xvcFreq << endl;
+         << "contactos: " << xvcFreq << " pasos" << endl;
     cout << "# \t Prefijo de archivo de coordenadas, velocidades y contactos: " 
          << xvcFile << endl;
+    cout << "# \t Frecuencia de guardado de energías: " << enerFreq << " pasos"
+        << endl;
+    cout << "# \t Archivo de registro de energías: " << enerFile << endl;
     cout << "# ... lectura de parámetros de entrada finalizada." << endl;
 }

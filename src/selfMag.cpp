@@ -26,10 +26,11 @@ using std::exit;
 
 #define PI 3.1415926
 
+
 int main(int argc, char *argv[])
 {
     cout << "# selfMag" << endl;
-    cout << "# v1.3 [2020.06.23]" << endl;
+    cout << "# v1.4 [2020.07.22]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile); 
     RandomGenerator rng(globalSetup->randomSeed);
@@ -89,7 +90,6 @@ int main(int argc, char *argv[])
     gInfo = new BodyData*[globalSetup->noTipoGranos];
     
     int contGid = 1;
-    int *sumaTipo = new int[globalSetup->noTipoGranos] {};
     for (int i = 0; i < globalSetup->noTipoGranos; i++) { /* Loop sobre tipos 
                                                              de granos. */
         gInfo[i] = new BodyData[globalSetup->granos[i]->noGranos];
@@ -159,22 +159,33 @@ int main(int argc, char *argv[])
     float timeS = 0.0;
     int32 pIterations = globalSetup->pIter;
     int32 vIterations = globalSetup->vIter;
+    Energias eKU {0.0, 0.0};
 
     cout << "# Inicio de la simulación..." << endl;
     b2Vec2 pos, avec; 
     int paso = 0;
     bool saveFrm = (globalSetup->saveFrameFreq > 0 ? true : false);
     bool saveXVC = (globalSetup->xvcFreq > 0 ? true : false);
+    bool saveEner = (globalSetup->enerFreq > 0 ? true : false);
     std::ofstream fileXVC;
     double noiseInt, noiseAng;
+    double vUmbralFricStat = globalSetup->caja.fgb_stat * globalSetup->g 
+        * globalSetup->tStep;
     std::ofstream fileF;
+    std::ofstream fileE;
+    if (saveEner) {
+        fileE.open(globalSetup->enerFile.c_str());
+        fileE << "# t e_Kinetic e_Potential" << endl;
+    }
+
+
     BodyData *infGr;
 
     b2Vec2 vtmp;
     float vtmpM, fricBase;
 
     // Primeros pasos para satisfacer restricciones
-    for (int i = 0; i < 5; ++i) world.Step(timeStep, pIterations, vIterations);
+    for (int i = 0; i < 10; ++i) world.Step(timeStep, pIterations, vIterations);
     
     // Guardo configuración inicial
     if (saveFrm) {
@@ -213,8 +224,9 @@ int main(int argc, char *argv[])
             bd->ApplyForce(infGr->f, bd->GetWorldCenter(), true);
             vtmp = bd->GetLinearVelocity();
             vtmpM = vtmp.Length();
-            if (vtmpM > 1.0e-3) {
-                fricBase = globalSetup->caja.fric * 9.8f * bd->GetMass();
+            if (vtmpM > vUmbralFricStat) {
+                fricBase = globalSetup->caja.fgb_dyn * globalSetup->g 
+                    * bd->GetMass();
                 vtmp.Normalize();
                 vtmp = -vtmp;
                 vtmp *= fricBase;
@@ -228,10 +240,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Avance del sistema en el tiempo
-        world.Step(timeStep,pIterations,vIterations);
-        paso++;
-        timeS += timeStep;
+        // Guardo energías si corresponde
+        if (saveEner && !(paso % globalSetup->enerFreq)) {
+            eKU = energyCalculation(&world);
+            fileE << timeS << " "
+                  << eKU.eKin << " "
+                  << eKU.ePot << endl;
+        }
 
         // Si es necesario, guardo el frame para graficar
         if (saveFrm && !(paso % globalSetup->saveFrameFreq)) {
@@ -251,6 +266,11 @@ int main(int argc, char *argv[])
             fileF.close();
         }
 
+        // Avance del sistema en el tiempo
+        world.Step(timeStep,pIterations,vIterations);
+        paso++;
+        timeS += timeStep;
+
         if (timeS > globalSetup->tMax) {
             cout << "# Máximo tiempo de simulación alcanzado." << endl;
             break;
@@ -263,7 +283,9 @@ int main(int argc, char *argv[])
     delete globalSetup;
     delete [] gInfo;
     delete [] verts;
-    delete [] sumaTipo;
+    if (saveEner) {
+        fileE.close();
+    }
 
     return 0;
 }	
