@@ -47,3 +47,10 @@ Ejemplo:
 
     ./dovideo.sh dd-100-20 10
 
+3. Gráfico de energías:
+
+    ./plotEnergias.py -f [archivo de energías]
+
+Ejemplo:
+
+    ./plotEnergias.py -f energias.dat
