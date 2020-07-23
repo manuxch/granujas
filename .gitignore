@@ -2,3 +2,4 @@
 /test/*
 .directory
 ./src/.directory
+./src/*.o
