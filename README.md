@@ -25,7 +25,7 @@ La documentación del código se genera en el directorio raíz con:
 Esto genera la documentación en html en el directorio /doc.
 
 # Uso:
-    ./siloMag params.ini &> salida.out
+    ./selfMag params.ini &> salida.out
 
 # Generación de animación:
 Este proceso consiste en dos pasos: 1) Generar los archivos de imágenes, 
@@ -47,7 +47,9 @@ Ejemplo:
 
     ./dovideo.sh dd-100-20 10
 
-3. Gráfico de energías:
+# Gráfico de energías:
+En caso de guardar las energías cinética y potencial durante la simulación,
+el script auxiliar `src/plotEnergias.py` permite graficarlas.
 
     ./plotEnergias.py -f [archivo de energías]
 
