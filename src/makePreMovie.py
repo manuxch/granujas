@@ -10,11 +10,26 @@ import pylab
 # import numpy as np
 import argparse
 import os
-import fnmatch
+import glob
+import sys
 
 ###
 # VER http://jakevdp.github.io/blog/2012/08/18/matplotlib-animation-tutorial/
 ###
+
+def progressbar(it, prefix="", size=60, file=sys.stdout):
+    '''Genera una barra de progreso de archivos procesados'''
+    count = len(it)
+    def show(j):
+        x = int(size*j/count)
+        file.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), j, count))
+        file.flush()
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i+1)
+    file.write("\n")
+    file.flush()
 
 parser = argparse.ArgumentParser(description='Programa para graficar frames.')
 parser.add_argument('-f','--pfile',help='Input data file', required=True, action="store")
@@ -24,17 +39,9 @@ preName = args.pfile + '_'
 
 fileFrames = []
 frames = []
-for root, dirnames, filenames in os.walk('.'):
-    #print root
-    #print dirnames
-    #print filenames
-    #print 80*'#'
-    for filename in fnmatch.filter(filenames, preName+'*.xy'):
-        frames.append(os.path.join(filename.split('.')[0]))
-        fileFrames.append(os.path.join(root, filename))
-#print fileFrames
+for f in glob.glob(preName + '*.xy'):
+    fileFrames.append(f)
 fileFrames.sort()
-print (fileFrames)
 
 params = {'backend': 'pdf',
         'interactive': False,
@@ -53,12 +60,10 @@ matplotlib.rcParams.update(params)
 
 nTotFiles = len(fileFrames)
 nActualFile = 1
-# fig, ax = pylab.subplots()
 colorG = []
 yMin = yMax = xMin = xMax = 0.0
 fig = pylab.figure(figsize=(10,10))
-for f in fileFrames:
-    print ("Procesando",f.split('/')[1], "(",nActualFile,"de",nTotFiles,")")
+for f in progressbar(fileFrames):
     fin = open(f,'r')
     data = fin.readlines()
     fin.close()
@@ -66,9 +71,7 @@ for f in fileFrames:
     patches = []
     caja = []
     lines = []
-    fplot = f.split('/')[1]
-    fout = preName + '{:06d}.jpg'.format(nActualFile)
-    #print (fplot, fout)
+    fout = preName + '{:06d}.png'.format(nActualFile)
     for linea in data:
         l = linea.split()
         gid = int(l[0])
@@ -85,7 +88,6 @@ for f in fileFrames:
                     yMin = bverts[i][1]
                 if bverts[i][1] > yMax:
                     yMax = bverts[i][1]
-
             for i in range(nv - 1):
                 lines.append([bverts[i], bverts[i+1]])
             continue
