@@ -258,6 +258,9 @@ void GlobalSetup::load(string inputFile){
         if (ident == "enerFile:") {
             fin >> enerFile;
         }
+        if (ident == "finXVCFile:") {
+            fin >> finXVCFile;
+        }
     } //fin bucle de lectura de inputFile
 } // Fin función load()
 
@@ -325,6 +328,7 @@ void GlobalSetup::load(string inputFile){
          << "contactos: " << xvcFreq << " pasos" << endl;
     cout << "# \t Prefijo de archivo de coordenadas, velocidades y contactos: " 
          << xvcFile << endl;
+    cout << "# \t Archivo final xvc : " << finXVCFile << endl;
     cout << "# \t Frecuencia de guardado de energías: " << enerFreq << " pasos"
         << endl;
     cout << "# \t Archivo de registro de energías: " << enerFile << endl;

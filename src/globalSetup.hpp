@@ -123,6 +123,7 @@ public:
                       coordenadas, velocidades y contactos */
     int enerFreq; /*!< Frecuencia de guardado de energías */
     string enerFile; /*!< Archivo de guardado de energías */
+    string finXVCFile; /*!< Archivo de guardadoi final de X, V, C */
 
     
     // Constructor & destructor

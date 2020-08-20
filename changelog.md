@@ -1,5 +1,13 @@
 # Changelog
 
+## 2020.08.20
+Versión 1.5
+
+- Cálculo del packing fraction del sistema
+- Guardado del último estado xvc
+- Agregado script para analizar el tamaño de clústers
+- Agregado script para analizar el número de coordinación y "strength" por nodo
+
 ## 2020.07.22
 Versión 1.4
 

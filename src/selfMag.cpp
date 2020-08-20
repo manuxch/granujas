@@ -5,8 +5,8 @@
  * de granos autopropulsados con dipolos magnéticos.
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
- * \version 1.2 
- * \date 2020.06.11
+ * \version 1.5 
+ * \date 2020.08.20
  */
 
 
@@ -30,7 +30,7 @@ using std::exit;
 int main(int argc, char *argv[])
 {
     cout << "# selfMag" << endl;
-    cout << "# v1.4 [2020.07.22]" << endl;
+    cout << "# v1.5 [2020.08.20]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile); 
     RandomGenerator rng(globalSetup->randomSeed);
@@ -75,7 +75,9 @@ int main(int argc, char *argv[])
     cajaFix.density = 0.0f;
     cajaFix.friction = globalSetup->caja.fric;
     caja->CreateFixture(&cajaFix);
-    cout << "#\t- Silo creado." << endl;
+    float areaCaja = 0.5 * nverts * globalSetup->caja.R * globalSetup->caja.R
+         * sin(2.0 * b2_pi / nverts);
+    cout << "#\t- Caja creada con area " << areaCaja << " m^2." << endl;
     
     // Generación de granos.
     float xInf, xSup, yInf, ySup, x, y;
@@ -88,6 +90,7 @@ int main(int argc, char *argv[])
 
     BodyData **gInfo;
     gInfo = new BodyData*[globalSetup->noTipoGranos];
+    float areaGranos = 0.0;
     
     int contGid = 1;
     for (int i = 0; i < globalSetup->noTipoGranos; i++) { /* Loop sobre tipos 
@@ -125,6 +128,7 @@ int main(int argc, char *argv[])
                 fixDef.restitution = globalSetup->granos[i]->rest;
                 grain->CreateFixture(&fixDef);
                 mg += grain->GetMass();
+                areaGranos += grain->GetMass() / fixDef.density;
                 if (j == 0) cout << "#\t- Grano de tipo " << i 
                     << " creado con masa " << grain->GetMass() 
                         << " kg." << endl;
@@ -144,6 +148,7 @@ int main(int argc, char *argv[])
                 fixDef.restitution = globalSetup->granos[i]->rest;
                 grain->CreateFixture(&fixDef);
                 mg += grain->GetMass();
+                areaGranos += grain->GetMass() / fixDef.density;
                 if (j == 0) cout << "#\t- Grano de tipo " << i 
                     << " creado con masa " << grain->GetMass() 
                         << " kg." << endl;
@@ -153,6 +158,8 @@ int main(int argc, char *argv[])
     } // Fin loop sobre tipo de granos	
     cout << "#\t- Número total de granos = " << noTotGranos << endl;
     cout << "#\t- Masa total de granos = " << mg << " kg."<< endl;
+    cout << "#\t- Packing fraction obtenido = " << areaGranos / areaCaja 
+        << endl;
 
     // Preparamos los parámetros de la simulación. 
     float timeStep = globalSetup->tStep;
@@ -193,7 +200,7 @@ int main(int argc, char *argv[])
         fileF.open(foutName.c_str());
         saveFrame(&fileF, &world);
         fileF.close();
-        cout << "Frame " << paso << " guardado en " << timeS << endl;
+        //cout << "Frame " << paso << " guardado en " << timeS << endl;
     }
 
     while (isActive(&world)) {
@@ -276,6 +283,10 @@ int main(int argc, char *argv[])
             break;
         }
     }
+    string foutName = globalSetup->finXVCFile;
+    fileF.open(foutName.c_str());
+    saveXVCFile(&fileF, &world);
+    fileF.close();
     cout << "Simulación finalizada." << endl;
 
     
