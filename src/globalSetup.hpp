@@ -103,6 +103,7 @@ public:
     // Parámetros de control de la simulación
     double tStep; /*!< Paso temporal de integración */
     double tMax; /*!< Límite temporal de la simulación */
+    double EkStop; /*!< Energía cinética de finalización de la simulación */
     int pIter; /*!< Iteraciones para la satisfacción de restricciones de 
                  posición */
     int vIter; /*!< Iteraciones para la satisfacción de restricciones de 

@@ -5,8 +5,8 @@
  * de granos autopropulsados con dipolos magnéticos.
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
- * \version 1.5 
- * \date 2020.08.20
+ * \version 1.6 
+ * \date 2020.09.01
  */
 
 
@@ -30,7 +30,7 @@ using std::exit;
 int main(int argc, char *argv[])
 {
     cout << "# selfMag" << endl;
-    cout << "# v1.5 [2020.08.20]" << endl;
+    cout << "# v1.6 [2020.09.01]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile); 
     RandomGenerator rng(globalSetup->randomSeed);
@@ -202,8 +202,8 @@ int main(int argc, char *argv[])
         fileF.close();
         //cout << "Frame " << paso << " guardado en " << timeS << endl;
     }
-
-    while (isActive(&world)) {
+    bool runSim = true;
+    while (runSim) {
 
         // Si es necesario, aplicación de impulsos
         if (globalSetup->noiseFreq &&  (timeS < globalSetup->tNoiseOff) 
@@ -280,7 +280,12 @@ int main(int argc, char *argv[])
 
         if (timeS > globalSetup->tMax) {
             cout << "# Máximo tiempo de simulación alcanzado." << endl;
-            break;
+            runSim = false;
+        }
+        if (timeS > 0.1 * globalSetup->tMax &&
+                eKU.eKin < globalSetup->EkStop ) {
+            cout << "# Energía cinética mínima alcanzada." << endl;
+            runSim = false;
         }
     }
     string foutName = globalSetup->finXVCFile;

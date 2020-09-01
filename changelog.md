@@ -1,5 +1,10 @@
 # Changelog
 
+## 2020.09.01
+Versión 1.6
+
+- Energía cinética mínima para mantener la simulación corriendo
+
 ## 2020.08.20
 Versión 1.5
 

@@ -169,6 +169,9 @@ void GlobalSetup::load(string inputFile){
                 exit(1);
             }
         }
+        if (ident == "finEkin:") {
+            fin >> EkStop;
+        }
         if (ident == "pIter:") {
             fin >> pIter;
             if (pIter < 0) {
@@ -305,6 +308,7 @@ void GlobalSetup::load(string inputFile){
     cout << "# Parámetros de control:" << endl;
     cout << "# \t Paso de integración: " << tStep << " s."<< endl;
     cout << "# \t Tiempo máximo de simulación: " << tMax << " s." << endl;
+    cout << "# \t Energía cinética de finalización: " << EkStop << " J." << endl;
     cout << "# \t Iteraciones para restricciones de posición: " << pIter 
         << endl;
     cout << "# \t Iteraciones para restricciones de velocidad: " << vIter 
