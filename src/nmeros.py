@@ -48,8 +48,7 @@ nc1 = []
 nc1_file = open(args.output, 'w')
 nc1_file.write('#label n clus_size \n')
 
-# for f in progressbar(file_list[args.skip:]):
-for f in progressbar(file_list[-1:]):
+for f in progressbar(file_list):
     fin = open(f, 'r')
     data = fin.readlines()
     fin.close()
