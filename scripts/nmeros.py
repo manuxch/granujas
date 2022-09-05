@@ -52,7 +52,8 @@ for f in progressbar(file_list):
     fin = open(f, 'r')
     data = fin.readlines()
     fin.close()
-    n_frm = int(f.split('_')[1][:-4])
+    #n_frm = int(f.split('_')[1][:-4])
+    n_frm = f.split('_')[1][:-4]
     G = nx.Graph()
     edges = []
     for linea in data[1:]:
@@ -79,7 +80,7 @@ for f in progressbar(file_list):
 for d in nc1:
     if d[1] == 0:
         continue
-    nc1_file.write('{:d} {:d} {:d}\n'.format(d[0], d[1], d[2]))
+    nc1_file.write('{:s} {:d} {:d}\n'.format(d[0], d[1], d[2]))
 
 
     # for c in clusters:

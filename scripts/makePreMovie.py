@@ -113,6 +113,7 @@ for f in progressbar(fileFrames):
     ax1 = pylab.gca()
     ax1.add_collection(p)
     ax1.add_collection(lc)
+    ax1.set_axis_off()
     alturaSilo = yMax - yMin
     pylab.xlim([1.1 * xMin, 1.1 * xMax])
     pylab.ylim([yMin - 0.05 * alturaSilo, yMax + 0.05 * alturaSilo])
