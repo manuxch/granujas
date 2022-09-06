@@ -70,3 +70,12 @@ void saveXVCFile(std::ofstream *ff, b2World *w);
  * \return Energias
  */
 Energias energyCalculation(b2World *w);
+
+/*! \fn end_condition(globalSetup *gs, float timeS, int nTap)
+ * \brief Determina la condición de finalización de la simulación
+ * \param globalSetup* gs
+ * \param float timeS
+ * \param int nTap
+ * \return bool
+ */
+bool end_condition(globalSetup *gs, float timeS, int nTap);

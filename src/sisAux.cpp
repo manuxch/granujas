@@ -209,3 +209,9 @@ Energias energyCalculation(b2World *w){
     }
     return eKU;
 }
+
+bool end_condition(globalSetup *gs, float timeS, int nTap) {
+    bool continue_sim = true;
+    if (gs->tapping && nTap > gs->n_taps) return false;
+    if (!gs->tapping && timeS > gs->tMax) return false;
+}

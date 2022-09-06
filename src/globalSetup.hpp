@@ -125,6 +125,9 @@ public:
     int enerFreq; /*!< Frecuencia de guardado de energías */
     string enerFile; /*!< Archivo de guardado de energías */
     string finXVCFile; /*!< Archivo de guardadoi final de X, V, C */
+    bool tapping; /*!< True: tapping, False: vibrating */
+    int n_taps; /*!< Cantidad de taps a registrar */
+    string preTapFile; /*!< Prefijo de archivos de tapping */ 
 
     
     // Constructor & destructor

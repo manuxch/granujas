@@ -5,8 +5,8 @@
  * de granos autopropulsados con dipolos magnéticos.
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
- * \version 1.6 
- * \date 2020.09.01
+ * \version 2.0 
+ * \date 2022.09.06
  */
 
 
@@ -30,7 +30,7 @@ using std::exit;
 int main(int argc, char *argv[])
 {
     cout << "# selfMag" << endl;
-    cout << "# v1.6 [2020.09.01]" << endl;
+    cout << "# v2.0 [2022.09.06]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile); 
     RandomGenerator rng(globalSetup->randomSeed);
@@ -164,6 +164,7 @@ int main(int argc, char *argv[])
     // Preparamos los parámetros de la simulación. 
     float timeStep = globalSetup->tStep;
     float timeS = 0.0;
+    int nTap = 1;
     int32 pIterations = globalSetup->pIter;
     int32 vIterations = globalSetup->vIter;
     Energias eKU {0.0, 0.0};
@@ -213,7 +214,8 @@ int main(int argc, char *argv[])
             for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
                 infGr = (BodyData*) (bd->GetUserData());
                 if (infGr->isGrain) {
-                    noiseAng = bd->GetAngle();
+                    // noiseAng = bd->GetAngle();
+                    noiseAng = rng.get01() * PI;
                     avec.Set(noiseInt * cos(noiseAng), 
                             noiseInt * sin(noiseAng));
                     if (infGr->r) {
@@ -277,16 +279,17 @@ int main(int argc, char *argv[])
         world.Step(timeStep,pIterations,vIterations);
         paso++;
         timeS += timeStep;
+        runSim = end_condition(globalSetup, timeS, nTap);
 
-        if (timeS > globalSetup->tMax) {
-            cout << "# Máximo tiempo de simulación alcanzado." << endl;
-            runSim = false;
-        }
-        if (timeS > 0.1 * globalSetup->tMax &&
-                eKU.eKin < globalSetup->EkStop ) {
-            cout << "# Energía cinética mínima alcanzada." << endl;
-            runSim = false;
-        }
+        // if (timeS > globalSetup->tMax) {
+            // cout << "# Máximo tiempo de simulación alcanzado." << endl;
+            // runSim = false;
+        // }
+        // if (timeS > 0.1 * globalSetup->tMax &&
+                // eKU.eKin < globalSetup->EkStop ) {
+            // cout << "# Energía cinética mínima alcanzada." << endl;
+            // runSim = false;
+        // }
     }
     string foutName = globalSetup->finXVCFile;
     fileF.open(foutName.c_str());

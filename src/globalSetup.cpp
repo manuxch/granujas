@@ -26,7 +26,7 @@ GlobalSetup::~GlobalSetup() {
 
 void GlobalSetup::load(string inputFile){
     ifstream fin(inputFile.c_str());
-    string ident;
+    string ident, aux;
     
     if (!fin.is_open()) {
         cout << "ERROR: No se puede abrir el archivo " << inputFile << endl;
@@ -263,6 +263,20 @@ void GlobalSetup::load(string inputFile){
         }
         if (ident == "finXVCFile:") {
             fin >> finXVCFile;
+        }
+        if (ident == "tapping:") {
+            fin >> aux;
+            tapping = (aux == "T" ? true : false);
+        }
+        if (ident == "n_taps:") {
+            fin >> n_taps;
+            if (n_taps < 1) {
+                cout << "ERROR: el número de taps debe ser > 0." << endl;
+                exit(1);
+            }
+        }
+        if (ident == "preTapFile:") {
+            fin >> preTapFile
         }
     } //fin bucle de lectura de inputFile
 } // Fin función load()
