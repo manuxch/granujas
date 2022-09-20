@@ -276,7 +276,7 @@ void GlobalSetup::load(string inputFile){
             }
         }
         if (ident == "preTapFile:") {
-            fin >> preTapFile
+            fin >> preTapFile;
         }
     } //fin bucle de lectura de inputFile
 } // Fin función load()

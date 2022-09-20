@@ -46,8 +46,6 @@ int main(int argc, char *argv[])
     b2BodyDef caja_def;
     caja_def.position.Set(0.0f, 0.0f);
     caja_def.type = b2_staticBody;
-    b2Body* caja;
-    caja = world.CreateBody(&caja_def);
     
     BodyData* cajaD = new BodyData;
     cajaD->isGrain = false;
@@ -55,7 +53,10 @@ int main(int argc, char *argv[])
     cajaD->gID = -100;
     cajaD->m = 0.0f;
     cajaD->r = 0;
-    caja->SetUserData(cajaD);
+    caja_def.userData.pointer = uintptr_t(cajaD);
+
+    b2Body* caja;
+    caja = world.CreateBody(&caja_def);
     
     int32 nverts = globalSetup->caja.nVerts;
     float xtmp, ytmp;
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
         xtmp = globalSetup->caja.R * cos(angle * b2_pi / 180.0f);
         ytmp = globalSetup->caja.R * sin(angle * b2_pi / 180.0f);
         verts[i].Set(xtmp, ytmp);
-        angle += delta_angle;
+        angle -= delta_angle;
     }
     b2ChainShape cajaShape;
     cajaShape.CreateLoop(verts, nverts);
@@ -115,8 +116,9 @@ int main(int argc, char *argv[])
             bd.bullet = globalSetup->isBullet;
             bd.position.Set(x,y);
             bd.angle = rng.getAB(-b2_pi,b2_pi);
+            bd.userData.pointer = uintptr_t(&gInfo[i][j]);
             b2Body* grain = world.CreateBody(&bd);
-            grain->SetUserData(&gInfo[i][j]);
+            // grain->SetUserData(&gInfo[i][j]);
             if (globalSetup->granos[i]->nLados == 1) {
                 b2CircleShape circle;
                 circle.m_radius = globalSetup->granos[i]->radio;
@@ -179,7 +181,6 @@ int main(int argc, char *argv[])
     double noiseInt, noiseAng;
     double vUmbralFricStat = globalSetup->caja.fgb_stat * globalSetup->g 
         * globalSetup->tStep;
-    std::ofstream fileF;
     std::ofstream fileE;
     if (saveEner) {
         fileE.open(globalSetup->enerFile.c_str());
@@ -197,25 +198,45 @@ int main(int argc, char *argv[])
     
     // Guardo configuración inicial
     if (saveFrm) {
-        string foutName = globalSetup->preFrameFile+ "_" + n2s(paso) + ".xy";
-        fileF.open(foutName.c_str());
-        saveFrame(&fileF, &world);
-        fileF.close();
+        saveFrame(&world, globalSetup, paso);
         //cout << "Frame " << paso << " guardado en " << timeS << endl;
+    }
+    if (globalSetup->tapping) {
+        eKU = energyCalculation(&world);
+        if (eKU.eKin < globalSetup->EkStop) {
+            // Guardo alguna info
+            //
+            nTap++;
+            noiseInt = globalSetup->noise;
+            //noiseInt = rng.get01() * globalSetup->noise;
+            for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
+                infGr = (BodyData*) (bd->GetUserData()).pointer;
+                if (infGr->isGrain) {
+                    // noiseAng = bd->GetAngle();
+                    noiseAng = rng.get01() * 2.0 * PI;
+                    avec.Set(noiseInt * cos(noiseAng), 
+                            noiseInt * sin(noiseAng));
+                    if (infGr->r) {
+                        avec*= -1.0;
+                    }
+                    bd->ApplyLinearImpulseToCenter(avec, true);
+                }
+            }
+        }
     }
     bool runSim = true;
     while (runSim) {
 
         // Si es necesario, aplicación de impulsos
-        if (globalSetup->noiseFreq &&  (timeS < globalSetup->tNoiseOff) 
+        if (globalSetup->noiseFreq && !globalSetup->tapping && (timeS < globalSetup->tNoiseOff) 
                 && !(paso % globalSetup->noiseFreq)) {
             noiseInt = globalSetup->noise;
             //noiseInt = rng.get01() * globalSetup->noise;
             for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
-                infGr = (BodyData*) (bd->GetUserData());
+                infGr = (BodyData*) (bd->GetUserData()).pointer;
                 if (infGr->isGrain) {
                     // noiseAng = bd->GetAngle();
-                    noiseAng = rng.get01() * PI;
+                    noiseAng = rng.get01() * 2.0 * PI;
                     avec.Set(noiseInt * cos(noiseAng), 
                             noiseInt * sin(noiseAng));
                     if (infGr->r) {
@@ -229,7 +250,7 @@ int main(int argc, char *argv[])
         // Cálculo y aplicación de fuerzas magnéticas y fricción con la base
         setMagneticForces(&world);
         for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
-            infGr = (BodyData*) (bd->GetUserData());
+            infGr = (BodyData*) (bd->GetUserData()).pointer;
             bd->ApplyForce(infGr->f, bd->GetWorldCenter(), true);
             vtmp = bd->GetLinearVelocity();
             vtmpM = vtmp.Length();
@@ -248,7 +269,30 @@ int main(int argc, char *argv[])
                 bd->SetAngularVelocity(0.0f);
             }
         }
-
+        
+        if (globalSetup->tapping) {
+            eKU = energyCalculation(&world);
+            if (eKU.eKin < globalSetup->EkStop) {
+                // Guardo alguna info
+                //
+                nTap++;
+                noiseInt = globalSetup->noise;
+                //noiseInt = rng.get01() * globalSetup->noise;
+                for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
+                    infGr = (BodyData*) (bd->GetUserData()).pointer;
+                    if (infGr->isGrain) {
+                        // noiseAng = bd->GetAngle();
+                        noiseAng = rng.get01() * 2.0 * PI;
+                        avec.Set(noiseInt * cos(noiseAng), 
+                                noiseInt * sin(noiseAng));
+                        if (infGr->r) {
+                            avec*= -1.0;
+                        }
+                        bd->ApplyLinearImpulseToCenter(avec, true);
+                    }
+                }
+            }
+        }
         // Guardo energías si corresponde
         if (saveEner && !(paso % globalSetup->enerFreq)) {
             eKU = energyCalculation(&world);
@@ -259,20 +303,12 @@ int main(int argc, char *argv[])
 
         // Si es necesario, guardo el frame para graficar
         if (saveFrm && !(paso % globalSetup->saveFrameFreq)) {
-            string foutName = globalSetup->preFrameFile+ "_" 
-                + n2s(paso) + ".xy";
-            fileF.open(foutName.c_str());
-            saveFrame(&fileF, &world);
-            fileF.close();
+            saveFrame(&world, globalSetup, paso);
             //cout << "Frame " << paso << " guardado en " << timeS << endl;
         }
         // Si es necesario, guardo las coordenadas, velocidades y contactos
         if (saveXVC && !(paso % globalSetup->xvcFreq)) {
-            string foutName = globalSetup->xvcFile+ "_" 
-                + n2s(paso) + ".xvc";
-            fileF.open(foutName.c_str());
-            saveXVCFile(&fileF, &world);
-            fileF.close();
+            saveXVCFile(&world, globalSetup, paso, false);
         }
 
         // Avance del sistema en el tiempo
@@ -292,9 +328,7 @@ int main(int argc, char *argv[])
         // }
     }
     string foutName = globalSetup->finXVCFile;
-    fileF.open(foutName.c_str());
-    saveXVCFile(&fileF, &world);
-    fileF.close();
+    saveXVCFile(&world, globalSetup, 0, true);
     cout << "Simulación finalizada." << endl;
 
     

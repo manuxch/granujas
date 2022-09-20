@@ -28,20 +28,13 @@ std::string n2s(int num);
  */
 bool isActive(b2World *w);
 
-/*! Escribe en el archivo de salida las coordenadas de las partículas
- * \param std::ofstream* ff
- * \param b2World* w
- * \return void
- */
-void savePart(std::ofstream *ff, b2World *w);
-
 /*! Escribe todas las coordenadas necesarias para generar imágenes
  * y posteriores animaciones
- * \param std::ofstream* ff
  * \param b2World* w
+ * \param int fID : identificador de filename_lower_camel
  * \return void
  */
-void saveFrame(std::ofstream *ff, b2World *w);
+void saveFrame(b2World *w, const GlobalSetup *gs, int fID);
 
 /*! Devuelve la cantidad de granos descargados
  * \param b2World* w
@@ -58,11 +51,13 @@ int countDesc(b2World *w, int *st, int maxD);
 void setMagneticForces(b2World *w);
 
 /*! Guarda las coordenadas, velocidades y contactos de todas los granos
- * \param std::ofstream* ff
  * \param b2World* w
+ * \param GlobalSetup* gs
+ * \param int fID
+ * \param bool final
  * \return void
  */
-void saveXVCFile(std::ofstream *ff, b2World *w);
+void saveXVCFile(b2World *w, const GlobalSetup *gs, int fID, bool final);
 
 /*! \fn energyCalculation
  * \brief Calcula la energía cinética y potencial magnética del sistema
@@ -78,4 +73,4 @@ Energias energyCalculation(b2World *w);
  * \param int nTap
  * \return bool
  */
-bool end_condition(globalSetup *gs, float timeS, int nTap);
+bool end_condition(GlobalSetup *gs, float timeS, int nTap);

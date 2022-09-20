@@ -62,8 +62,8 @@ nTotFiles = len(fileFrames)
 nActualFile = 1
 colorG = []
 yMin = yMax = xMin = xMax = 0.0
-fig = pylab.figure(figsize=(10,10))
 for f in progressbar(fileFrames):
+    fig = pylab.figure(figsize=(10,10))
     fin = open(f,'r')
     data = fin.readlines()
     fin.close()
@@ -120,4 +120,4 @@ for f in progressbar(fileFrames):
     pylab.savefig(fout)
     pylab.cla()
     nActualFile += 1
-pylab.close(fig)
+    pylab.close(fig)

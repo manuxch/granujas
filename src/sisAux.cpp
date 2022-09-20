@@ -20,75 +20,64 @@ bool isActive(b2World *w) {
     BodyData* infGr;
     b2Vec2 posGr;
     for (b2Body *bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
-        infGr = (BodyData*) (bd->GetUserData());
+        infGr = (BodyData*) (bd->GetUserData()).pointer;
         if (infGr->isGrain && bd->IsAwake()) return true;
     }
     return false;
 }
 
-void savePart(std::ofstream *ff, b2World *w) {
-    BodyData* infGr;
-    b2Vec2 p; float angle;
-    for (b2Body *bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
-        infGr = (BodyData*) (bd->GetUserData());
-        if (infGr->isGrain) {
-            p = bd->GetPosition();
-            angle = bd->GetAngle();
-            *(ff) << infGr->gID << " " << p.x << " " << p.y << " " << angle 
-                  << " " << endl;
-        }
-    }
-    *(ff) << std::flush;
-}
-
-void saveFrame(std::ofstream *ff,  b2World *w) {
+void saveFrame(b2World *w, const GlobalSetup *gs, int fID) {
+    string foutName = gs->preFrameFile + "_" + n2s(fID) + ".xy";
+    std::ofstream fileF;
+    fileF.open(foutName.c_str());
     b2Vec2 v2; float xtmp, ytmp;
     for ( b2Body* bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
-        BodyData* infGr = (BodyData*) (bd->GetUserData());
-        *(ff) << infGr->gID << " ";
+        BodyData *infGr = (BodyData*) (bd->GetUserData()).pointer;
+        fileF << infGr->gID << " ";
         if (infGr->isGrain) {
             if (infGr->nLados > 1) {    // Es un polígono
                 b2Fixture* f = bd->GetFixtureList();
                 b2Shape *shape = f->GetShape();
                 b2PolygonShape *poly = (b2PolygonShape*) shape;
                 int count = poly->m_count;
-                *(ff) << count << " ";
+                fileF << count << " ";
                 b2Vec2* verts = (b2Vec2*) poly->m_vertices;
                 for (int i = 0; i < count; ++i) {
                     xtmp = bd->GetWorldPoint(verts[i]).x;
                     ytmp = bd->GetWorldPoint(verts[i]).y;
-                    *(ff) << xtmp << " " << ytmp << " ";
+                    fileF << xtmp << " " << ytmp << " ";
                 }
             }
             if (infGr->nLados == 1) {   // Es un círculo
-                *(ff) << "1 ";
+                fileF << "1 ";
                 b2Vec2 pos = bd->GetPosition();
                  b2Fixture* f = bd->GetFixtureList();
                  b2Shape* bs = (b2Shape*) f->GetShape();
                 float radio = bs->m_radius;
-                *(ff) << pos.x << " " << pos.y << " " << radio << " ";
+                fileF << pos.x << " " << pos.y << " " << radio << " ";
             }
             if (infGr->isMag) {
-                *(ff) << 1 << " ";
+                fileF << 1 << " ";
             }
             else {
-                *(ff) << 0 << " ";
+                fileF << 0 << " ";
             }
-            *(ff) << infGr->tipo << " ";
-            *(ff) << endl;
+            fileF << infGr->tipo << " ";
+            fileF << endl;
         }
         else {  // Es la caja
              b2Fixture *f = bd->GetFixtureList();
              b2ChainShape *s = (b2ChainShape*) f->GetShape();
             b2Vec2 *verts = (b2Vec2*) s->m_vertices;
-            *(ff) << s->m_count << " ";
+            fileF << s->m_count << " ";
             for (int i = 0; i < s->m_count; ++i) {
                 verts[i] = bd->GetWorldPoint(verts[i]);
-                *(ff) << verts[i].x << " " << verts[i].y << " ";
+                fileF << verts[i].x << " " << verts[i].y << " ";
             }
-            *(ff) << "BOX" << endl;
+            fileF << "BOX" << endl;
         }
     }
+    fileF.close();
 }
 
 int countDesc(b2World *w, int *st, int maxDiam) {
@@ -96,7 +85,7 @@ int countDesc(b2World *w, int *st, int maxDiam) {
     b2Vec2 p;
     int nGranos = 0;
     for (b2Body *bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
-        infGr = (BodyData*) (bd->GetUserData());
+        infGr = (BodyData*) (bd->GetUserData()).pointer;
         if (infGr->isGrain) {
             p = bd->GetPosition();
             if (p.y < -maxDiam) {
@@ -113,15 +102,15 @@ void setMagneticForces(b2World *w) {
     b2Vec2 r1, r2, r12, sumF;
     float fB, r;
     for (b2Body *bd1 = w->GetBodyList(); bd1; bd1 = bd1->GetNext()) {
-        i1 = (BodyData*) (bd1->GetUserData());
+        i1 = (BodyData*) (bd1->GetUserData()).pointer;
         i1->f = b2Vec2(0.0, 0.0);
     }
     for (b2Body *bd1 = w->GetBodyList(); bd1; bd1 = bd1->GetNext()) {
-        i1 = (BodyData*) (bd1->GetUserData());
+        i1 = (BodyData*) (bd1->GetUserData()).pointer;
         if (!i1->isMag) continue;
         r1 = bd1->GetPosition();
         for (b2Body *bd2 = bd1->GetNext(); bd2; bd2 = bd2->GetNext()) {
-            i2 = (BodyData*) (bd2->GetUserData());
+            i2 = (BodyData*) (bd2->GetUserData()).pointer;
             if (!i2->isMag) continue;
             if (i1->gID == i2->gID) continue;
             r2 = bd2->GetPosition();
@@ -136,10 +125,15 @@ void setMagneticForces(b2World *w) {
     }
 }
 
-void saveXVCFile(std::ofstream *ff, b2World *w) {
+void saveXVCFile(b2World *w, const GlobalSetup *gs, int fID, bool final) {
+    string foutName = (final ? gs->finXVCFile : gs->xvcFile);
+    string fid = (final ? "" : n2s(fID));
+    foutName += "_" + n2s(fID) + ".xvc";
+    std::ofstream fileF;
+    fileF.open(foutName.c_str());
     b2Vec2 p, v; 
     float ang, angv;
-    (*ff) << setw(5) << "#id" << " "
+    fileF << setw(5) << "#id" << " "
         << setw(8) << "xc" << " "
         << setw(8) << "yc" << " "
         << setw(8) << "ang" << " "
@@ -150,7 +144,7 @@ void saveXVCFile(std::ofstream *ff, b2World *w) {
         << setw(2) << "nc" << " c1 c2 ..." << std::endl;
 
     for (b2Body* bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
-        BodyData* infGr = (BodyData*) (bd->GetUserData());
+        BodyData* infGr = (BodyData*) (bd->GetUserData()).pointer;
         if (!(infGr->isGrain)) continue; 
         p = bd->GetPosition();
         ang = bd->GetAngle();
@@ -160,10 +154,10 @@ void saveXVCFile(std::ofstream *ff, b2World *w) {
         for (b2ContactEdge *e = bd->GetContactList(); e; e = e->next) {
             if(!(e->contact->IsTouching())) continue;
             b2Body *bb = e->other;
-            BodyData *infGrB = (BodyData*) (bb->GetUserData());
+            BodyData* infGrB = (BodyData*) (bb->GetUserData()).pointer;
             contacts.push_back(infGrB->gID);
         }
-        (*ff) << setw(5) << infGr->gID  << " "
+        fileF << setw(5) << infGr->gID  << " "
             << setw(8) << fixed << setprecision(3) << p.x << " "
             << setw(8) << fixed << setprecision(3) << p.y << " " 
             << setw(8) << fixed << setprecision(3) << ang << " "
@@ -171,12 +165,13 @@ void saveXVCFile(std::ofstream *ff, b2World *w) {
             << setw(8) << fixed << setprecision(3) << v.y << " "
             << setw(8) << fixed << setprecision(3) << angv << " "
             << setw(2) << infGr->tipo + 1 << " ";
-        (*ff) << contacts.size() << " ";
+        fileF << contacts.size() << " ";
         for (size_t i = 0; i < contacts.size(); ++i) {
-            (*ff) << contacts[i] << " ";
+            fileF << contacts[i] << " ";
         }
-        (*ff) << std::endl;
+        fileF << std::endl;
     }
+    fileF.close();
 }
 
 Energias energyCalculation(b2World *w){
@@ -185,7 +180,7 @@ Energias energyCalculation(b2World *w){
     float wi, mi, Ii, vim, pijm;
     float mui, muj;
     for (b2Body* bi = w->GetBodyList(); bi; bi = bi->GetNext()) {
-        BodyData* igi = (BodyData*) (bi->GetUserData());
+        BodyData* igi = (BodyData*) (bi->GetUserData()).pointer;
         if (!igi->isGrain) continue;
         pi = bi->GetPosition();
         vi = bi->GetLinearVelocity();
@@ -196,7 +191,7 @@ Energias energyCalculation(b2World *w){
         Ii = bi->GetInertia();
         eKU.eKin += 0.5 * (mi * vim * vim + Ii * wi * wi);
         for (b2Body* bj = bi->GetNext(); bj; bj = bj->GetNext()) {
-            BodyData* igj = (BodyData*) (bj->GetUserData());
+            BodyData* igj = (BodyData*) (bj->GetUserData()).pointer;
             if (!igj->isGrain) continue;
             pj = bj->GetPosition();
             muj = igj->m;
@@ -210,8 +205,8 @@ Energias energyCalculation(b2World *w){
     return eKU;
 }
 
-bool end_condition(globalSetup *gs, float timeS, int nTap) {
-    bool continue_sim = true;
+bool end_condition(GlobalSetup *gs, float timeS, int nTap) {
     if (gs->tapping && nTap > gs->n_taps) return false;
     if (!gs->tapping && timeS > gs->tMax) return false;
+    return true;
 }
