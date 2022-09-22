@@ -25,7 +25,8 @@ def progressbar(it, prefix="", size=60, file=sys.stdout):
 
 # Levanto todos los archivos con datos del grafo (*xvc)
 file_list = []
-for f in glob.glob('../result*/*/*.xvc'):
+for f in glob.glob('*.xvc'):
+#  for f in glob.glob('../result*/*/*.xvc'):
     file_list.append(f)
 n_files = len(file_list)
 file_list.sort()

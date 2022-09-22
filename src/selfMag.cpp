@@ -201,32 +201,52 @@ int main(int argc, char *argv[])
         saveFrame(&world, globalSetup, paso);
         //cout << "Frame " << paso << " guardado en " << timeS << endl;
     }
+    // Tap inicial
     if (globalSetup->tapping) {
-        eKU = energyCalculation(&world);
-        if (eKU.eKin < globalSetup->EkStop) {
-            // Guardo alguna info
-            //
-            nTap++;
-            noiseInt = globalSetup->noise;
-            //noiseInt = rng.get01() * globalSetup->noise;
-            for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
-                infGr = (BodyData*) (bd->GetUserData()).pointer;
-                if (infGr->isGrain) {
-                    // noiseAng = bd->GetAngle();
-                    noiseAng = rng.get01() * 2.0 * PI;
-                    avec.Set(noiseInt * cos(noiseAng), 
-                            noiseInt * sin(noiseAng));
-                    if (infGr->r) {
-                        avec*= -1.0;
-                    }
-                    bd->ApplyLinearImpulseToCenter(avec, true);
+        noiseInt = globalSetup->noise;
+        //noiseInt = rng.get01() * globalSetup->noise;
+        for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
+            infGr = (BodyData*) (bd->GetUserData()).pointer;
+            if (infGr->isGrain) {
+                // noiseAng = bd->GetAngle();
+                noiseAng = rng.get01() * 2.0 * PI;
+                avec.Set(noiseInt * cos(noiseAng), 
+                        noiseInt * sin(noiseAng));
+                if (infGr->r) {
+                    avec*= -1.0;
                 }
+                bd->ApplyLinearImpulseToCenter(avec, true);
             }
         }
     }
     bool runSim = true;
     while (runSim) {
 
+        if (globalSetup->tapping) {
+            eKU = energyCalculation(&world);
+            if (eKU.eKin < globalSetup->EkStop) {
+            // if (eKU.eKin / noTotGranos < globalSetup->EkStop) {
+                // Guardo alguna info
+                //
+                saveXVCFile(&world, globalSetup, nTap, false);
+                nTap++;
+                noiseInt = globalSetup->noise;
+                //noiseInt = rng.get01() * globalSetup->noise;
+                for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
+                    infGr = (BodyData*) (bd->GetUserData()).pointer;
+                    if (infGr->isGrain) {
+                        // noiseAng = bd->GetAngle();
+                        noiseAng = rng.get01() * 2.0 * PI;
+                        avec.Set(noiseInt * cos(noiseAng), 
+                                noiseInt * sin(noiseAng));
+                        if (infGr->r) {
+                            avec*= -1.0;
+                        }
+                        bd->ApplyLinearImpulseToCenter(avec, true);
+                    }
+                }
+            }
+        }
         // Si es necesario, aplicación de impulsos
         if (globalSetup->noiseFreq && !globalSetup->tapping && (timeS < globalSetup->tNoiseOff) 
                 && !(paso % globalSetup->noiseFreq)) {
@@ -270,29 +290,6 @@ int main(int argc, char *argv[])
             }
         }
         
-        if (globalSetup->tapping) {
-            eKU = energyCalculation(&world);
-            if (eKU.eKin < globalSetup->EkStop) {
-                // Guardo alguna info
-                //
-                nTap++;
-                noiseInt = globalSetup->noise;
-                //noiseInt = rng.get01() * globalSetup->noise;
-                for (b2Body *bd = world.GetBodyList(); bd; bd = bd->GetNext()) {
-                    infGr = (BodyData*) (bd->GetUserData()).pointer;
-                    if (infGr->isGrain) {
-                        // noiseAng = bd->GetAngle();
-                        noiseAng = rng.get01() * 2.0 * PI;
-                        avec.Set(noiseInt * cos(noiseAng), 
-                                noiseInt * sin(noiseAng));
-                        if (infGr->r) {
-                            avec*= -1.0;
-                        }
-                        bd->ApplyLinearImpulseToCenter(avec, true);
-                    }
-                }
-            }
-        }
         // Guardo energías si corresponde
         if (saveEner && !(paso % globalSetup->enerFreq)) {
             eKU = energyCalculation(&world);

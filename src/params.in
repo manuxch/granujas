@@ -15,7 +15,7 @@
 #	[Caja_rest]: Coeficiente de restitución de la caja 0 <= Caja_rest <= 1
 #   [fricGB_static]: Coeficiente de fricción estática grano-base
 #   [fricGB_dynamic]: Coeficiente de fricción dinámica grano-base
-Radio_caja: 12.25
+Radio_caja: 20.25
 n_vertices: 40
 Caja_fric: 0.5
 Caja_rest: 0.5
@@ -37,8 +37,8 @@ fricGB:dynamic: 0.35
 #       [r]: 0 si avanza en el sentido de la orientación del grano, 0 en 
 #            reversa
 noTipoGranos: 2
-250 0.5 3 1.0 0.5 0.1  1000.0 0
-250 0.5 3 1.0 0.5 0.1 -1000.0 1
+150 0.5 4 1.0 0.5 0.1  1000.0 0
+100 0.5 5 1.0 0.5 0.1 -1000.0 0
 
 # Control de la simulación
 #	[timeStep]: Paso de integración del movimiento (en s)
@@ -56,19 +56,19 @@ noTipoGranos: 2
 #   [tapping]: T: tapping, F: vibrating
 #   [n_taps]: Cantidad de taps a registrar
 #   [preTapFile]: Prefijo de los archivos de tapping
-timeStep: 0.001 
-tMax: 15.0
-finEkin: 20.0
+timeStep: 0.005 
+tMax: 1.0
+finEkin: 0.2
 pIter: 50
 vIter: 50
 g: 9.8
-noise: 0.1
-noiseFreq: 10
+noise: 2.0
+noiseFreq: 100
 tNoiseOff: 4.0
 atenuacion_rot: 0.95
 Bullets: T
 tapping: T
-n_taps: 10
+n_taps: 4
 preTapFile: tap
 RandomSeed: 131
 
@@ -80,9 +80,9 @@ RandomSeed: 131
 #   [enerFreq]: Paso de guardado de energías
 #   [enerFile]: Archivo para el registro de energías
 #   [finXVCFile]: Archivo coordenadas, velocidades y contactos finales
-saveFrameFreq: 50
+saveFrameFreq: 100
 preFrameFile: frm
-xvc_Freq: 50
+xvc_Freq: 0
 xvc_File: xvc
 enerFreq: 50
 enerFile: energias.dat
